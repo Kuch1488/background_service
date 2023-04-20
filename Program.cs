@@ -10,7 +10,8 @@ if (string.IsNullOrWhiteSpace(appSettings.FolderToWatch))
 }
 
 var folderToWatch = appSettings.FolderToWatch.Replace("\\", Path.DirectorySeparatorChar.ToString());
-var folderWatcherService = new FolderWatcherService(folderToWatch);
+var watchPeriod = appSettings.WatchPeriod;
+var folderWatcherService = new FolderWatcherService(folderToWatch, watchPeriod);
 folderWatcherService.StartWatching();
 
 Console.WriteLine("Press any key to exit...");
