@@ -1,4 +1,5 @@
-﻿using Quartz;
+﻿using Microsoft.Extensions.Logging;
+using Quartz;
 
 namespace background_service
 {
@@ -6,15 +7,19 @@ namespace background_service
     {
         private readonly string _folderToWatch;
         private readonly string _watchPeriod;
+        private readonly ILogger<FolderWatcherService> _logger;
 
-        public FolderWatcherService(string folderToWatch, string watchPeriod)
+        public FolderWatcherService(string folderToWatch, string watchPeriod, ILogger<FolderWatcherService> logger)
         {
             _folderToWatch = folderToWatch;
             _watchPeriod = watchPeriod;
+            _logger = logger;
         }
 
         public void StartWatching()
         {
+            _logger.LogInformation($"Сервис мониторинга папки {_folderToWatch} запущен");
+
             //Console.WriteLine(_watchPeriod);
             var cronExpression = new CronExpression(_watchPeriod);
             var nextDateTime = cronExpression.GetNextValidTimeAfter(DateTime.Now);
@@ -55,16 +60,20 @@ namespace background_service
 
                 watcher.EnableRaisingEvents = true;
             }
+
+            _logger.LogInformation($"Сервис мониторинга папки {_folderToWatch} завершен");
         }
 
         private void OnRenamed(object source, RenamedEventArgs e)
         {
             Console.WriteLine($"{e.ChangeType} {e.OldFullPath} -> {e.FullPath}");
+            _logger.LogInformation($"Файл {e.OldFullPath} -> {e.FullPath} {e.ChangeType}");
         }
 
         private void OnChanged(object source, FileSystemEventArgs e)
         {
             Console.WriteLine($"{e.ChangeType} {e.FullPath}");
+            _logger.LogInformation($"Файл {e.FullPath} {e.ChangeType}");
         }
     }
 }
